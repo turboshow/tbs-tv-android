@@ -9,7 +9,9 @@ import com.squareup.moshi.Moshi
 import com.squareup.moshi.Types
 import fi.iki.elonen.NanoHTTPD
 import net.lingala.zip4j.ZipFile
+import okio.BufferedSource
 import okio.Okio
+import okio.Source
 import org.apache.commons.io.IOUtils
 import java.io.File
 import javax.inject.Inject
@@ -59,7 +61,20 @@ class WebServer @Inject constructor(
         session.parseBody(files)
         val playlist = if (files.containsKey("playlist")) {
             val tmp = File(files["playlist"])
-            adapter.fromJson(Okio.buffer(Okio.source(tmp.inputStream())))
+            var fileSource: Source = Okio.source(File(files["playlist"]).inputStream());
+            val filename: String? = session.parameters.get("playlist")?.get(0)
+            if (filename != null && (filename.endsWith("txt")||filename.endsWith("csv"))) {//支持txt 格式和csv格式
+                var clist: MutableList<Channel> = ArrayList(32)
+                tmp.forEachLine {
+                    println(it)
+                    var strs = it.split(",")
+                    clist.add(Channel(strs[0], strs[1]))
+                }
+                clist!!
+
+            } else {
+                adapter.fromJson(Okio.buffer(fileSource))
+            }
         } else {
             adapter.fromJson(files["postData"]!!)
         }

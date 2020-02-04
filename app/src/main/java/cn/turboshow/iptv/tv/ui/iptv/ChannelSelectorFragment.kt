@@ -38,7 +38,7 @@ class ChannelSelectorFragment : DaggerDialogFragment() {
 
     private fun initChannelsView() {
         viewModel.channels.observe(this, androidx.lifecycle.Observer {
-            channelsView.adapter = ArrayAdapter(context!!, android.R.layout.simple_list_item_1, it)
+            channelsView.adapter = ArrayAdapter(context!!, R.layout.channel_text, it)
             channelsView.setOnItemClickListener { _, _, position, _ ->
                 viewModel.selectChannel(position)
                 dismiss()
